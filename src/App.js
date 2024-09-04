@@ -1,25 +1,52 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import Registro from './Registro';
+import RecordatorioEvento from './RecordatorioEvento';
+import Encuesta from './Encuesta';
+import axios from 'axios';
 
-function App() {
+const App = () => {
+  const [registered, setRegistered] = useState(false);
+  const [name, setName] = useState('');
+  const address = 'Guayaquil, Ecuador';
+  const [feedback, setFeedback] = useState('');
+  const [allFeedback, setAllFeedback] = useState([]);
+
+  const handleRegister = (name, email) => {
+    setRegistered(true);
+    setName(name);
+  };
+
+  const handleFeedbackSubmit = (feedback) => {
+    setFeedback(feedback);
+  };
+
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/encuesta');
+        setAllFeedback(response.data);
+      } catch (error) {
+        console.error('Error al obtener feedback:', error);
+      }
+    };
+
+    fetchFeedback(); 
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app-container">
+      <h1>Bienvenido al Evento</h1>
+      <Registro onRegister={handleRegister} />
+      {registered && (
+        <>
+          <RecordatorioEvento address={address} />
+          <Encuesta name={name} onSubmit={handleFeedbackSubmit} />
+          {feedback && <p>Gracias por tu respuesta {feedback}</p>}
+        </>
+      )}
+      
     </div>
   );
-}
+};
 
 export default App;
